@@ -50,4 +50,4 @@ clean:
 
 test:
 	@echo "Running tests..."
-	$(PYTHON) -m pytest 
+	$(PYTHON) -m pytest

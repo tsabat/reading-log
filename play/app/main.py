@@ -1,4 +1,5 @@
 import datetime
+
 from contextlib import asynccontextmanager
 from typing import List
 
@@ -26,7 +27,10 @@ def get_sessions():
     """Get all reading sessions"""
     try:
         sessions = list(Session.select())
-        return [SessionResponse(id=session.id, date=session.date, duration=session.duration) for session in sessions]
+        return [
+            SessionResponse(id=session.id, date=session.date, duration=session.duration)
+            for session in sessions
+        ]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -35,8 +39,12 @@ def get_sessions():
 def create_session(session: SessionCreate):
     """Create a new reading session"""
     try:
-        new_session = Session(date=session.date or datetime.datetime.now(), duration=session.duration)
-        return SessionResponse(id=new_session.id, date=new_session.date, duration=new_session.duration)
+        new_session = Session(
+            date=session.date or datetime.datetime.now(), duration=session.duration
+        )
+        return SessionResponse(
+            id=new_session.id, date=new_session.date, duration=new_session.duration
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -46,7 +54,9 @@ def get_session(session_id: int):
     """Get a specific reading session by ID"""
     try:
         session = Session.get(session_id)
-        return SessionResponse(id=session.id, date=session.date, duration=session.duration)
+        return SessionResponse(
+            id=session.id, date=session.date, duration=session.duration
+        )
     except Exception:
         raise HTTPException(status_code=404, detail="Session not found")
 
@@ -62,7 +72,9 @@ def update_session(session_id: int, session_update: SessionUpdate):
         if session_update.duration is not None:
             session.duration = session_update.duration
 
-        return SessionResponse(id=session.id, date=session.date, duration=session.duration)
+        return SessionResponse(
+            id=session.id, date=session.date, duration=session.duration
+        )
     except Exception:
         raise HTTPException(status_code=404, detail="Session not found")
 

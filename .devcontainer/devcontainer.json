@@ -1,0 +1,73 @@
+{
+  "name": "contextive, pipeline, Python 3.12, Node 20.x",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "username": "root",
+      "upgradePackages": true
+    }
+  },
+  "remoteUser": "root",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // General
+        "GitHub.copilot",
+        "VisualStudioExptTeam.vscodeintellicode",
+        "Gruntfuggly.todo-tree",
+        "bierner.github-markdown-preview",
+        "cschleiden.vscode-github-actions",
+        "ryanluker.vscode-coverage-gutters",
+        "hbenl.vscode-test-explorer",
+        // Formatters
+        "esbenp.prettier-vscode",
+        "yzhang.markdown-all-in-one",
+        "tamasfe.even-better-toml",
+        "redhat.vscode-yaml",
+        "wholroyd.jinja",
+        "shd101wyy.markdown-preview-enhanced",
+        // Python
+        "ms-python.python",
+        "njpwerner.autodocstring",
+        "LittleFoxTeam.vscode-python-test-adapter",
+        "charliermarsh.ruff",
+        "ms-python.mypy-type-checker",
+        // Add Jupyter support
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+        "ms-toolsai.vscode-jupyter-cell-tags",
+        "ms-toolsai.vscode-jupyter-slideshow"
+      ]
+    },
+    "settings": {
+      "python.defaultInterpreterPath": "/workspaces/${workspaceFolderBasename}/.venv/bin/python",
+      "jupyter.kernels.filter": [
+        {
+          "path": "/workspaces/${workspaceFolderBasename}/.venv/bin/python",
+          "type": "pythonEnvironment"
+        }
+      ],
+      "jupyter.defaultKernelSpec": "python3",
+      "jupyter.interactiveWindow.creationMode": "perFile",
+      "jupyter.askForKernelRestart": false,
+      "jupyter.notebookKernel.startupTimeout": 60,
+      "jupyter.notebookEditor.insertToolbarButtons": true,
+      "jupyter.notebookFileRoot": "${workspaceFolder}",
+      "jupyter.alwaysTrustNotebooks": true
+    }
+  },
+
+  "postCreateCommand": "chmod +x .devcontainer/post-create.sh && .devcontainer/post-create.sh",
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+    "source=${localEnv:HOME}/.oh-my-zsh/custom,target=/root/.oh-my-zsh/custom,type=bind"
+  ],
+  "runArgs": ["--network=host"]
+}
