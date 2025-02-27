@@ -2,7 +2,7 @@ import os
 
 from pathlib import Path
 
-from sqlobject import connectionForURI, sqlhub
+from sqlobject import connectionForURI, sqlhub  # type: ignore
 
 from app.logger import get_logger
 
