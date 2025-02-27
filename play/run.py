@@ -27,7 +27,7 @@ def main():
 
     # Run the application
     logger.info("Starting FastAPI application on port %s...", port)
-    uvicorn.run("app.main:app", host="127.0.0.1", port=port, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True)  # noqa: S104
 
 
 if __name__ == "__main__":
