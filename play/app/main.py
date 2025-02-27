@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from typing import List
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.connection import setup_connection
 from app.models.session import Session
@@ -20,6 +21,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Reading Tracker API", lifespan=lifespan)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/sessions", response_model=List[SessionResponse])
