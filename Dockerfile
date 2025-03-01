@@ -29,4 +29,4 @@ ENV HOST=0.0.0.0
 EXPOSE 8888
 
 # Run the application using the Railway start script
-CMD ["python", "scripts/railway_start.py"]
+CMD ["sh", "-c", "python scripts/postgres_diagnostic.py && python scripts/railway_migrate.py && python scripts/railway_start.py"]
