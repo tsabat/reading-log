@@ -122,25 +122,66 @@ Once the application is running, you can access the API documentation at:
 - `PATCH /reading-logs/{reading_log_id}` - Update a reading log
 - `DELETE /reading-logs/{reading_log_id}` - Delete a reading log
 
-### Legacy Sessions API (Deprecated)
-
-- `GET /sessions` - Get all reading sessions
-- `POST /sessions` - Create a new reading session
-- `GET /sessions/{session_id}` - Get a specific reading session
-- `PATCH /sessions/{session_id}` - Update a reading session
-- `DELETE /sessions/{session_id}` - Delete a reading session
-
 ## Deployment
 
 ### Railway
 
 This application is configured for deployment on Railway using Docker containers.
 
-1. Push your code to a GitHub repository
-2. Create a new project on Railway from your GitHub repository
-3. Railway will automatically detect the Dockerfile and build your application
-4. Set the required environment variables in the Railway dashboard:
-   - `DATABASE_URL` - PostgreSQL connection string (Railway will provide this automatically if you add a PostgreSQL plugin)
+#### Prerequisites
+
+- [Railway CLI](https://docs.railway.app/develop/cli) (optional, but recommended)
+- A Railway account
+- A GitHub repository with your code
+
+#### Deployment Steps
+
+1. Push your code to a GitHub repository:
+
+```bash
+git add .
+git commit -m "Prepare for Railway deployment"
+git push origin main
+```
+
+2. Create a new project on Railway:
+   - Go to [Railway Dashboard](https://railway.app/dashboard)
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+   - Select your repository
+   - Click "Deploy Now"
+
+3. Add a PostgreSQL database:
+   - In your project dashboard, click "New"
+   - Select "Database" and then "PostgreSQL"
+   - Railway will automatically create a PostgreSQL database and provide the connection details
+
+4. Link the database to your application:
+   - In your project dashboard, click on your application service
+   - Go to the "Variables" tab
+   - Railway will automatically add the `DATABASE_URL` variable from your PostgreSQL service
+   - Add additional environment variables if needed:
+     - `ENVIRONMENT=production`
+
+5. Your application will automatically deploy and be accessible at the provided Railway URL.
+
+#### Using Railway CLI (Optional)
+
+If you prefer using the CLI:
+
+```bash
+# Login to Railway
+railway login
+
+# Link to your project
+railway link
+
+# Add PostgreSQL plugin
+railway add
+
+# Deploy your application
+railway up
+```
 
 ## Development
 

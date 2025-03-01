@@ -5,13 +5,6 @@ from app.models.reading_log import (
     ReadingLogRead,
     ReadingLogUpdate,
 )
-from app.models.session import (
-    Session,
-    SessionBase,
-    SessionCreate,
-    SessionRead,
-    SessionUpdate,
-)
 
 __all__ = [
     "ReadingLog",
@@ -19,9 +12,4 @@ __all__ = [
     "ReadingLogCreate",
     "ReadingLogRead",
     "ReadingLogUpdate",
-    "Session",
-    "SessionBase",
-    "SessionCreate",
-    "SessionRead",
-    "SessionUpdate",
 ]
