@@ -7,7 +7,7 @@
   "deploy": {
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10,
-    "startCommand": "python scripts/postgres_diagnostic.py && python scripts/railway_migrate.py && python scripts/railway_start.py",
+    "startCommand": "python scripts/railway_start.py",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 15
   }

@@ -7,6 +7,7 @@ This script is used as a pre-start command to ensure the database is properly se
 import os
 import sys
 import time
+import traceback
 
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
 from dotenv import load_dotenv
+from sqlmodel import SQLModel
 
 from app.db.database import create_db_and_tables
 from app.support.logging_support import get_logger
@@ -55,6 +57,27 @@ def main():
             + database_url.split("@")[1]
         )
         logger.info("DATABASE_URL: %s", masked_url)
+
+    # Explicitly import all models to ensure they're registered with SQLModel
+    try:
+        logger.info("Importing models to ensure they're registered with SQLModel...")
+        # Import all models here
+        from app.models.reading_log import ReadingLog
+
+        # Log the imported models
+        models = [ReadingLog]
+        model_names = [model.__name__ for model in models]
+        logger.info("Imported models: %s", ", ".join(model_names))
+
+        # Log the tables in the metadata
+        metadata_tables = list(SQLModel.metadata.tables.keys())
+        logger.info("Tables in SQLModel metadata: %s", metadata_tables)
+    except Exception as e:
+        logger.exception(
+            "Error importing models: %s\n%s", str(e), traceback.format_exc()
+        )
+        # Continue execution even if model import fails
+        # The create_db_and_tables function will attempt to import models again
 
     # Try to create database tables with retries
     for attempt in range(MAX_RETRIES):

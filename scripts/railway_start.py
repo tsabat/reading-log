@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Script to start the application on Railway.
-This script properly handles the PORT environment variable.
+This script properly handles the PORT environment variable and ensures database tables exist.
 """
 
 import os
@@ -17,10 +17,36 @@ import uvicorn
 
 from dotenv import load_dotenv
 
+from app.db.database import create_db_and_tables
 from app.support.logging_support import get_logger
 
 # Set up logger
 logger = get_logger(__name__)
+
+
+def ensure_database_ready():
+    """Ensure database is ready and tables exist."""
+    logger.info("Ensuring database is ready and tables exist...")
+
+    try:
+        # Import models to ensure they're registered with SQLModel
+        from app.models.reading_log import ReadingLog
+
+        # Log the imported models
+        models = [ReadingLog]
+        model_names = [model.__name__ for model in models]
+        logger.info("Imported models: %s", ", ".join(model_names))
+
+        # Create database tables
+        create_db_and_tables()
+        logger.info("Database tables created/verified successfully")
+
+        return True
+    except Exception as e:
+        logger.exception(
+            "Error ensuring database is ready: %s\n%s", str(e), traceback.format_exc()
+        )
+        return False
 
 
 def main():
@@ -70,6 +96,11 @@ def main():
                 logger.info("Hostname resolved to IP: %s", ip_address)
             except Exception as e:
                 logger.warning("Failed to resolve hostname: %s", str(e))
+
+        # Ensure database is ready before starting the application
+        db_ready = ensure_database_ready()
+        if not db_ready:
+            logger.warning("Database may not be fully ready, but continuing startup...")
 
         # Run the application with proper error handling
         logger.info("Starting uvicorn server...")
