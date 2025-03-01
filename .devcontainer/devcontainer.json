@@ -69,5 +69,7 @@
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
     "source=${localEnv:HOME}/.oh-my-zsh/custom,target=/root/.oh-my-zsh/custom,type=bind"
   ],
-  "runArgs": ["--network=host"]
+  "forwardPorts": [8888],
+  "appPort": ["8888:8888"],
+  "runArgs": []
 }

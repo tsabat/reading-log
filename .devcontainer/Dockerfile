@@ -15,28 +15,20 @@ RUN apt update
 RUN apt install -y nodejs
 RUN npm install -g npm@latest
 
-# Install AWS CLI
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-RUN unzip awscliv2.zip
-RUN sudo ./aws/install
-RUN rm -rf awscliv2.zip aws
-
-# Install AWS CDK
-RUN npm install -g aws-cdk
 
 # Install Docker CLI
 RUN apt-get update && apt-get install -y \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release
+  apt-transport-https \
+  ca-certificates \
+  curl \
+  gnupg \
+  lsb-release
 RUN install -m 0755 -d /etc/apt/keyrings
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 RUN chmod a+r /etc/apt/keyrings/docker.gpg
 RUN echo \
-    "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-    "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-    tee /etc/apt/sources.list.d/docker.list > /dev/null
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
 RUN apt-get update && apt-get install -y docker-ce-cli
 RUN apt-get install -y vim

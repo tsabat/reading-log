@@ -5,13 +5,16 @@ description = "Contextive pipeline experiments"
 license = "Proprietary"
 authors = ["Contextive Engineering <engineering@contextive.com>"]
 readme = "README.md"
-packages = [{ include = "play" }]
+packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = "^0.104.0"
 uvicorn = "^0.23.2"
 pydantic = "^2.4.2"
+sqlmodel = "^0.0.14"
+psycopg2-binary = "^2.9.9"
+python-dotenv = "^1.0.1"
 
 [tool.poetry.group.development.dependencies]
 pre-commit = "^3.7.0"
