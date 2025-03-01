@@ -24,12 +24,22 @@ if DATABASE_URL and DATABASE_URL.startswith("postgresql"):
     # Use PostgreSQL in production
     logger.info("Using PostgreSQL database")
 
+    # Log the database URL (masking password)
+    masked_url = (
+        DATABASE_URL.split("@")[0].split(":")[0] + ":***@" + DATABASE_URL.split("@")[1]
+    )
+    logger.info("Original DATABASE_URL: %s", masked_url)
+
     # Fix for Railway's PostgreSQL URL format
-    # Railway provides DATABASE_URL in the format: postgresql://postgres:password@containers-us-west-1.railway.app:5432/railway
-    # But SQLAlchemy expects: postgresql+psycopg2://postgres:password@containers-us-west-1.railway.app:5432/railway
+    # Railway provides DATABASE_URL in the format: postgresql://postgres:password@postgres.railway.internal:5432/railway
+    # But SQLAlchemy expects: postgresql+psycopg2://postgres:password@postgres.railway.internal:5432/railway
     if not DATABASE_URL.startswith("postgresql+psycopg2://"):
         DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://")
         logger.info("Modified DATABASE_URL to use psycopg2 driver")
+
+    # Check if we're using Railway's internal PostgreSQL
+    if "railway.internal" in DATABASE_URL:
+        logger.info("Using Railway's internal PostgreSQL")
 
     try:
         logger.info("Connecting to PostgreSQL database...")

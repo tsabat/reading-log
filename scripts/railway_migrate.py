@@ -41,6 +41,21 @@ def main():
         ):
             logger.info("Environment variable: %s = %s", key, value)
 
+    # Check if DATABASE_URL is set
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        logger.error("DATABASE_URL environment variable not set")
+        sys.exit(1)
+
+    # Log the database URL (masking password)
+    if ":" in database_url and "@" in database_url:
+        masked_url = (
+            database_url.split("@")[0].split(":")[0]
+            + ":***@"
+            + database_url.split("@")[1]
+        )
+        logger.info("DATABASE_URL: %s", masked_url)
+
     # Try to create database tables with retries
     for attempt in range(MAX_RETRIES):
         try:
