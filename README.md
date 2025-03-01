@@ -1,11 +1,11 @@
 # Reading App
 
-A simple application for tracking reading sessions.
+A simple application for tracking reading activities.
 
 ## Features
 
-- Track reading sessions with duration and description
-- CRUD operations for managing reading sessions
+- Track reading logs with duration and description
+- CRUD operations for managing reading logs
 - API built with FastAPI and SQLModel
 - Support for both SQLite (local development) and PostgreSQL (production)
 
@@ -93,6 +93,8 @@ The project includes a Makefile with various commands to simplify development:
 - `make db-migrate` - Run database migrations
 - `make export-requirements` - Export requirements.txt for non-Poetry environments
 - `make setup` - Setup the project (install dependencies and initialize database)
+- `make debug-port` - Run a simple HTTP server to debug port forwarding
+- `make check-port` - Check if the port is accessible
 
 ### Scripts
 
@@ -101,6 +103,7 @@ The project includes several utility scripts in the `scripts/` directory:
 - `scripts/init_db.py` - Initialize the database
 - `scripts/migrate_db.py` - Run database migrations
 - `scripts/run_app.py` - Run the application
+- `scripts/debug_port.py` - Debug port forwarding issues
 
 ### API Documentation
 
@@ -110,6 +113,16 @@ Once the application is running, you can access the API documentation at:
 - ReDoc: http://localhost:8888/redoc
 
 ## API Endpoints
+
+### Reading Logs API
+
+- `GET /reading-logs` - Get all reading logs
+- `POST /reading-logs` - Create a new reading log
+- `GET /reading-logs/{reading_log_id}` - Get a specific reading log
+- `PATCH /reading-logs/{reading_log_id}` - Update a reading log
+- `DELETE /reading-logs/{reading_log_id}` - Delete a reading log
+
+### Legacy Sessions API (Deprecated)
 
 - `GET /sessions` - Get all reading sessions
 - `POST /sessions` - Create a new reading session

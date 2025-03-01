@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.reading_logs import router as reading_logs_router
 from app.api.sessions import router as sessions_router
 from app.db.database import create_db_and_tables
 
@@ -25,7 +26,7 @@ async def lifespan(app: FastAPI):
 # Create FastAPI application
 app = FastAPI(
     title="Reading App API",
-    description="API for tracking reading sessions",
+    description="API for tracking reading sessions and logs",
     version="0.1.0",
     lifespan=lifespan,
 )
@@ -41,6 +42,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(sessions_router)
+app.include_router(reading_logs_router)
 
 
 @app.get("/")
