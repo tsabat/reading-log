@@ -15,6 +15,7 @@ pydantic = "^2.4.2"
 sqlmodel = "^0.0.14"
 psycopg2-binary = "^2.9.9"
 python-dotenv = "^1.0.1"
+rich = "^13.9.4"
 
 [tool.poetry.group.development.dependencies]
 pre-commit = "^3.7.0"
