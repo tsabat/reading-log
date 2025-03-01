@@ -1,4 +1,4 @@
-.PHONY: install run dev clean test lint format docker-build docker-run help db-init db-migrate export-requirements setup check-port debug-port
+.PHONY: install run dev clean test lint format docker-build docker-run help db-init db-migrate export-requirements setup check-port debug-port test-api
 
 # Default target
 .DEFAULT_GOAL := help
@@ -10,6 +10,7 @@ DOCKER = docker
 APP_NAME = reading-app
 PORT = 8888
 HOST = 0.0.0.0
+API_URL = https://web-production-f727e.up.railway.app
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -68,3 +69,6 @@ check-port: ## Check if the port is accessible
 
 debug-port: ## Run a simple HTTP server to debug port forwarding
 	$(POETRY) run $(PYTHON) scripts/debug_port.py
+
+test-api: ## Test the API endpoints
+	$(POETRY) run $(PYTHON) scripts/test_api.py --url $(API_URL)

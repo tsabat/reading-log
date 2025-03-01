@@ -95,6 +95,7 @@ The project includes a Makefile with various commands to simplify development:
 - `make setup` - Setup the project (install dependencies and initialize database)
 - `make debug-port` - Run a simple HTTP server to debug port forwarding
 - `make check-port` - Check if the port is accessible
+- `make test-api` - Test the API endpoints
 
 ### Scripts
 
@@ -106,6 +107,7 @@ The project includes several utility scripts in the `scripts/` directory:
 - `scripts/debug_port.py` - Debug port forwarding issues
 - `scripts/railway_start.py` - Start the application on Railway
 - `scripts/railway_migrate.py` - Run database migrations on Railway
+- `scripts/test_api.py` - Test the API endpoints
 
 ### API Documentation
 
@@ -198,6 +200,30 @@ railway add
 # Deploy your application
 railway up
 ```
+
+## Troubleshooting
+
+### Railway Deployment Issues
+
+If you encounter issues with your Railway deployment, try the following:
+
+1. **Check the logs**: Railway provides detailed logs for your application. Check the deploy logs and HTTP logs for any error messages.
+
+2. **Verify environment variables**: Make sure all required environment variables are set correctly in the Railway dashboard.
+
+3. **Test the health endpoint**: The application has a health endpoint at `/health` that checks if the application and database are working correctly.
+
+4. **Run the test script**: You can run the test script against your deployed application to verify that all endpoints are working:
+
+```bash
+python scripts/test_api.py --url https://your-railway-app-url.railway.app
+```
+
+5. **Check database connectivity**: Make sure the application can connect to the PostgreSQL database. The application will log database connection issues.
+
+6. **Restart the service**: Sometimes simply restarting the service can resolve issues. You can do this from the Railway dashboard.
+
+7. **Redeploy the application**: If all else fails, try redeploying the application with the latest code.
 
 ## Development
 
