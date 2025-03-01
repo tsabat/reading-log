@@ -104,6 +104,8 @@ The project includes several utility scripts in the `scripts/` directory:
 - `scripts/migrate_db.py` - Run database migrations
 - `scripts/run_app.py` - Run the application
 - `scripts/debug_port.py` - Debug port forwarding issues
+- `scripts/railway_start.py` - Start the application on Railway
+- `scripts/railway_migrate.py` - Run database migrations on Railway
 
 ### API Documentation
 
@@ -164,6 +166,20 @@ git push origin main
      - `ENVIRONMENT=production`
 
 5. Your application will automatically deploy and be accessible at the provided Railway URL.
+
+#### Railway Configuration
+
+The application includes several Railway-specific files:
+
+- `railway.json` - Configuration file for Railway deployment
+- `Procfile` - Defines the command to run the application
+- `scripts/railway_start.py` - Script to start the application on Railway
+- `scripts/railway_migrate.py` - Script to run database migrations on Railway
+
+The deployment process will:
+1. Build the Docker image using the Dockerfile
+2. Run database migrations using `railway_migrate.py`
+3. Start the application using `railway_start.py`
 
 #### Using Railway CLI (Optional)
 

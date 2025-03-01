@@ -17,6 +17,9 @@ RUN poetry install --no-dev --no-interaction --no-ansi
 # Copy application code
 COPY . .
 
+# Make scripts executable
+RUN chmod +x scripts/*.py
+
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PORT=8888
@@ -25,5 +28,5 @@ ENV HOST=0.0.0.0
 # Expose the port
 EXPOSE 8888
 
-# Run the application
-CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT
+# Run the application using the Railway start script
+CMD ["python", "scripts/railway_start.py"]
