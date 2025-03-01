@@ -174,18 +174,19 @@ git push origin main
 The application includes several Railway-specific files:
 
 - `railway.json` - Configuration file for Railway deployment
-- `Procfile` - Defines the command to run the application
+- `Dockerfile` - Defines how to build the application container
 - `scripts/railway_start.py` - Script to start the application on Railway
-- `scripts/railway_migrate.py` - Script to run database migrations on Railway
 
 The deployment process will:
 1. Build the Docker image using the Dockerfile
-2. Run database migrations using `railway_migrate.py`
-3. Start the application using `railway_start.py`
+2. Start the application using `railway_start.py`, which will:
+   - Check database connectivity
+   - Create database tables if they don't exist
+   - Start the FastAPI application
 
 #### Using Railway CLI (Optional)
 
-If you prefer using the CLI:
+If you prefer using the CLI for faster iterations during development:
 
 ```bash
 # Login to Railway
@@ -194,12 +195,24 @@ railway login
 # Link to your project
 railway link
 
-# Add PostgreSQL plugin
-railway add
-
-# Deploy your application
+# Deploy your application directly (without Git push)
 railway up
 ```
+
+This allows you to quickly test changes without going through the Git workflow each time.
+
+### Scripts
+
+The project includes several utility scripts in the `scripts/` directory:
+
+- `scripts/init_db.py` - Initialize the database
+- `scripts/migrate_db.py` - Run database migrations
+- `scripts/run_app.py` - Run the application
+- `scripts/debug_port.py` - Debug port forwarding issues
+- `scripts/railway_start.py` - Start the application on Railway (includes database table creation)
+- `scripts/test_api.py` - Test the API endpoints
+- `scripts/check_tables.py` - Check if database tables exist and create them if needed
+- `scripts/postgres_diagnostic.py` - Diagnostic script for PostgreSQL connection issues
 
 ## Troubleshooting
 
@@ -223,7 +236,9 @@ python scripts/test_api.py --url https://your-railway-app-url.railway.app
 
 6. **Restart the service**: Sometimes simply restarting the service can resolve issues. You can do this from the Railway dashboard.
 
-7. **Redeploy the application**: If all else fails, try redeploying the application with the latest code.
+7. **Redeploy the application**: If all else fails, try redeploying the application with the latest code:
+   - From the dashboard: Trigger a new deployment
+   - From the CLI: Run `railway up`
 
 ## Development
 

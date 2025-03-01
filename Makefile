@@ -1,4 +1,4 @@
-.PHONY: install run dev clean test lint format docker-build docker-run help db-init db-migrate export-requirements setup check-port debug-port test-api check-db
+.PHONY: install run dev clean test lint format docker-build docker-run help db-init db-migrate export-requirements setup check-port debug-port test-api check-db check-tables railway-deploy
 
 # Default target
 .DEFAULT_GOAL := help
@@ -10,7 +10,7 @@ DOCKER = docker
 APP_NAME = reading-app
 PORT = 8888
 HOST = 0.0.0.0
-API_URL = https://web-production-f727e.up.railway.app
+API_URL = http://localhost:$(PORT)
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -22,7 +22,7 @@ install: ## Install dependencies
 	$(POETRY) install
 
 run: ## Run the application in production mode
-	$(POETRY) run $(PYTHON) scripts/run_app.py
+	$(POETRY) run $(PYTHON) scripts/railway_start.py
 
 dev: ## Run the application in development mode with auto-reload
 	$(POETRY) run uvicorn app.main:app --reload --host $(HOST) --port $(PORT)
@@ -75,3 +75,9 @@ test-api: ## Test the API endpoints
 
 check-db: ## Check database connection
 	$(POETRY) run $(PYTHON) scripts/check_db.py
+
+check-tables: ## Check if database tables exist and create them if needed
+	$(POETRY) run $(PYTHON) scripts/check_tables.py
+
+railway-deploy: ## Deploy to Railway using the CLI
+	railway up
