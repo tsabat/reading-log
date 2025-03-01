@@ -6,6 +6,7 @@ This script properly handles the PORT environment variable.
 
 import os
 import sys
+import traceback
 
 from pathlib import Path
 
@@ -40,6 +41,36 @@ def main():
             ):
                 logger.info("Environment variable: %s = %s", key, value)
 
+        # Check if DATABASE_URL is set
+        database_url = os.getenv("DATABASE_URL")
+        if not database_url:
+            logger.error("DATABASE_URL environment variable not set")
+            sys.exit(1)
+
+        # Log the database URL (masking password)
+        if ":" in database_url and "@" in database_url:
+            masked_url = (
+                database_url.split("@")[0].split(":")[0]
+                + ":***@"
+                + database_url.split("@")[1]
+            )
+            logger.info("DATABASE_URL: %s", masked_url)
+
+        # Check if we're using Railway's internal PostgreSQL
+        if "railway.internal" in database_url:
+            logger.info("Using Railway's internal PostgreSQL")
+
+            # Try to resolve the hostname
+            try:
+                import socket
+
+                hostname = database_url.split("@")[1].split("/")[0].split(":")[0]
+                logger.info("Attempting to resolve hostname: %s", hostname)
+                ip_address = socket.gethostbyname(hostname)
+                logger.info("Hostname resolved to IP: %s", ip_address)
+            except Exception as e:
+                logger.warning("Failed to resolve hostname: %s", str(e))
+
         # Run the application with proper error handling
         logger.info("Starting uvicorn server...")
         uvicorn.run(
@@ -51,7 +82,9 @@ def main():
             forwarded_allow_ips="*",  # Allow forwarded IPs from Railway's proxy
         )
     except Exception as e:
-        logger.exception("Failed to start application: %s", str(e))
+        logger.exception(
+            "Failed to start application: %s\n%s", str(e), traceback.format_exc()
+        )
         sys.exit(1)
 
 

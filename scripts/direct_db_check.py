@@ -5,7 +5,9 @@ This script bypasses SQLModel and uses psycopg2 directly.
 """
 
 import os
+import socket
 import sys
+import traceback
 
 from pathlib import Path
 
@@ -39,6 +41,15 @@ def main():
     )
     logger.info("Database URL: %s", masked_url)
 
+    # Log all environment variables for debugging (excluding sensitive ones)
+    logger.info("Environment variables:")
+    for key, value in os.environ.items():
+        if not any(
+            sensitive in key.lower()
+            for sensitive in ["password", "secret", "key", "token"]
+        ):
+            logger.info("  %s = %s", key, value)
+
     try:
         # Parse the database URL
         # Format: postgresql://username:password@hostname:port/database
@@ -61,7 +72,31 @@ def main():
             database,
         )
 
+        # Try to resolve the hostname
+        try:
+            logger.info("Attempting to resolve hostname: %s", hostname)
+            ip_address = socket.gethostbyname(hostname)
+            logger.info("Hostname resolved to IP: %s", ip_address)
+        except Exception as e:
+            logger.warning("Failed to resolve hostname: %s", str(e))
+
+            # If hostname is postgres.railway.internal, try to use the PGHOST environment variable
+            if hostname == "postgres.railway.internal":
+                pghost = os.getenv("PGHOST")
+                if pghost:
+                    logger.info("Using PGHOST environment variable: %s", pghost)
+                    hostname = pghost
+
+                    # Try to resolve the new hostname
+                    try:
+                        logger.info("Attempting to resolve PGHOST: %s", hostname)
+                        ip_address = socket.gethostbyname(hostname)
+                        logger.info("PGHOST resolved to IP: %s", ip_address)
+                    except Exception as e2:
+                        logger.warning("Failed to resolve PGHOST: %s", str(e2))
+
         # Connect to PostgreSQL
+        logger.info("Attempting to connect to PostgreSQL...")
         conn = psycopg2.connect(
             host=hostname,
             port=port,
@@ -113,7 +148,9 @@ def main():
 
         return True
     except Exception as e:
-        logger.exception("Error connecting to PostgreSQL: %s", str(e))
+        logger.exception(
+            "Error connecting to PostgreSQL: %s\n%s", str(e), traceback.format_exc()
+        )
         return False
 
 

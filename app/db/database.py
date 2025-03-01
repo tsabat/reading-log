@@ -1,5 +1,7 @@
 import os
+import socket
 import time
+import traceback
 
 from typing import Generator
 
@@ -41,6 +43,26 @@ if DATABASE_URL and DATABASE_URL.startswith("postgresql"):
     if "railway.internal" in DATABASE_URL:
         logger.info("Using Railway's internal PostgreSQL")
 
+        # Try to resolve the hostname
+        try:
+            hostname = DATABASE_URL.split("@")[1].split("/")[0].split(":")[0]
+            logger.info("Attempting to resolve hostname: %s", hostname)
+            ip_address = socket.gethostbyname(hostname)
+            logger.info("Hostname resolved to IP: %s", ip_address)
+        except Exception as e:
+            logger.warning("Failed to resolve hostname: %s", str(e))
+
+            # If hostname is postgres.railway.internal, try to use the PGHOST environment variable
+            if hostname == "postgres.railway.internal":
+                pghost = os.getenv("PGHOST")
+                if pghost:
+                    logger.info("Using PGHOST environment variable: %s", pghost)
+                    # Update the DATABASE_URL with the PGHOST value
+                    DATABASE_URL = DATABASE_URL.replace(
+                        "postgres.railway.internal", pghost
+                    )
+                    logger.info("Updated DATABASE_URL with PGHOST")
+
     try:
         logger.info("Connecting to PostgreSQL database...")
         engine = create_engine(
@@ -52,7 +74,9 @@ if DATABASE_URL and DATABASE_URL.startswith("postgresql"):
         )
         logger.info("PostgreSQL engine created successfully")
     except Exception as e:
-        logger.exception("Failed to create PostgreSQL engine: %s", str(e))
+        logger.exception(
+            "Failed to create PostgreSQL engine: %s\n%s", str(e), traceback.format_exc()
+        )
         raise
 else:
     # Use SQLite for local development
@@ -64,7 +88,9 @@ else:
         )
         logger.info("SQLite engine created successfully")
     except Exception as e:
-        logger.exception("Failed to create SQLite engine: %s", str(e))
+        logger.exception(
+            "Failed to create SQLite engine: %s\n%s", str(e), traceback.format_exc()
+        )
         raise
 
 
@@ -102,13 +128,16 @@ def create_db_and_tables() -> None:
                 time.sleep(RETRY_DELAY)
             else:
                 logger.exception(
-                    "Failed to create database tables after %s attempts: %s",
+                    "Failed to create database tables after %s attempts: %s\n%s",
                     MAX_RETRIES,
                     str(e),
+                    traceback.format_exc(),
                 )
                 raise
         except Exception as e:
-            logger.exception("Error creating database tables: %s", str(e))
+            logger.exception(
+                "Error creating database tables: %s\n%s", str(e), traceback.format_exc()
+            )
             raise
 
 
@@ -119,7 +148,9 @@ def get_session() -> Generator[Session, None, None]:
         session = Session(engine)
         yield session
     except SQLAlchemyError as e:
-        logger.exception("Database session error: %s", str(e))
+        logger.exception(
+            "Database session error: %s\n%s", str(e), traceback.format_exc()
+        )
         if session:
             session.rollback()
         raise
