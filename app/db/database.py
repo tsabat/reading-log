@@ -23,11 +23,19 @@ RETRY_DELAY = 2  # seconds
 if DATABASE_URL and DATABASE_URL.startswith("postgresql"):
     # Use PostgreSQL in production
     logger.info("Using PostgreSQL database")
+
+    # Fix for Railway's PostgreSQL URL format
     # Railway provides DATABASE_URL in the format: postgresql://postgres:password@containers-us-west-1.railway.app:5432/railway
+    # But SQLAlchemy expects: postgresql+psycopg2://postgres:password@containers-us-west-1.railway.app:5432/railway
+    if not DATABASE_URL.startswith("postgresql+psycopg2://"):
+        DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://")
+        logger.info("Modified DATABASE_URL to use psycopg2 driver")
+
     try:
+        logger.info("Connecting to PostgreSQL database...")
         engine = create_engine(
             DATABASE_URL,
-            echo=False,
+            echo=True,  # Set to True to see all SQL queries for debugging
             pool_pre_ping=True,
             pool_recycle=300,  # Recycle connections after 5 minutes
             connect_args={"connect_timeout": 10},  # 10 seconds connection timeout
@@ -54,9 +62,22 @@ def create_db_and_tables() -> None:
     """Create database tables if they don't exist."""
     logger.info("Creating database tables if they don't exist")
 
+    # Import all models to ensure they're registered with SQLModel
+    # This is important to make sure all tables are created
+    logger.info("Imported models: ReadingLog")
+
     for attempt in range(MAX_RETRIES):
         try:
+            # Create all tables defined in SQLModel metadata
             SQLModel.metadata.create_all(engine)
+
+            # Verify tables were created by listing them
+            from sqlalchemy import inspect
+
+            inspector = inspect(engine)
+            tables = inspector.get_table_names()
+            logger.info("Tables in database: %s", tables)
+
             logger.info("Database tables created successfully")
             return
         except OperationalError as e:

@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
 from dotenv import load_dotenv
+from sqlalchemy import inspect
 from sqlmodel import Session, select
 
 from app.db.database import engine
@@ -45,6 +46,24 @@ def check_database_connection():
 
     # Try to connect to the database
     try:
+        # Check if tables exist
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        logger.info("Tables in database: %s", tables)
+
+        if not tables:
+            logger.warning("No tables found in the database!")
+
+            # Try to create tables
+            logger.info("Attempting to create tables...")
+            from app.db.database import create_db_and_tables
+
+            create_db_and_tables()
+
+            # Check again
+            tables = inspector.get_table_names()
+            logger.info("Tables after creation attempt: %s", tables)
+
         with Session(engine) as session:
             # Try to execute a simple query
             result = session.exec(select(ReadingLog).limit(1)).all()
