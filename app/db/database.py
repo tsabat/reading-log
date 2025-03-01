@@ -98,9 +98,31 @@ def create_db_and_tables() -> None:
     """Create database tables if they don't exist."""
     logger.info("Creating database tables if they don't exist")
 
-    # Import all models to ensure they're registered with SQLModel
+    # Explicitly import all models to ensure they're registered with SQLModel
     # This is important to make sure all tables are created
-    logger.info("Imported models: ReadingLog")
+    try:
+        # Import all models here to ensure they're registered
+        from app.models.reading_log import ReadingLog
+
+        # Log the imported models and their __tablename__ attributes
+        models = [ReadingLog]
+        model_names = [model.__name__ for model in models]
+        logger.info("Imported models: %s", ", ".join(model_names))
+
+        # Log the table names that will be created
+        table_names = [
+            getattr(model, "__tablename__", model.__name__.lower()) for model in models
+        ]
+        logger.info("Tables to be created: %s", table_names)
+
+        # Log the tables in the metadata
+        metadata_tables = list(SQLModel.metadata.tables.keys())
+        logger.info("Tables in SQLModel metadata: %s", metadata_tables)
+    except Exception as e:
+        logger.exception(
+            "Error importing models: %s\n%s", str(e), traceback.format_exc()
+        )
+        raise
 
     for attempt in range(MAX_RETRIES):
         try:
@@ -113,6 +135,53 @@ def create_db_and_tables() -> None:
             inspector = inspect(engine)
             tables = inspector.get_table_names()
             logger.info("Tables in database: %s", tables)
+
+            # Check if our expected tables are in the database
+            missing_tables = [
+                table
+                for table in table_names
+                if table.lower() not in [t.lower() for t in tables]
+            ]
+            if missing_tables:
+                logger.warning("Some expected tables are missing: %s", missing_tables)
+
+                # Try to create the missing tables directly with SQL
+                with Session(engine) as _session:
+                    for model_class in models:
+                        table_name = getattr(
+                            model_class, "__tablename__", model_class.__name__.lower()
+                        )
+                        if table_name.lower() in [t.lower() for t in missing_tables]:
+                            logger.info(
+                                "Attempting to create missing table %s directly with SQL",
+                                table_name,
+                            )
+                            try:
+                                # Create the table directly using SQLModel's create_all with a subset of tables
+                                # This avoids the need to access __table__ directly
+                                model_metadata = SQLModel.metadata
+                                tables_to_create = [
+                                    table
+                                    for name, table in model_metadata.tables.items()
+                                    if name.lower() == table_name.lower()
+                                ]
+                                if tables_to_create:
+                                    model_metadata.create_all(
+                                        engine, tables=tables_to_create
+                                    )
+                                    logger.info("Created table %s directly", table_name)
+                                else:
+                                    logger.warning(
+                                        "Could not find table %s in metadata",
+                                        table_name,
+                                    )
+                            except Exception as e:
+                                logger.exception(
+                                    "Failed to create table %s directly: %s\n%s",
+                                    table_name,
+                                    str(e),
+                                    traceback.format_exc(),
+                                )
 
             logger.info("Database tables created successfully")
             return
