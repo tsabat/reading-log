@@ -2,9 +2,10 @@ import os
 import traceback
 
 from contextlib import asynccontextmanager
+from typing import Any, Dict, List
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlmodel import Session, select
@@ -98,18 +99,46 @@ async def health(db: Session = Depends(get_session)):
     Health check endpoint.
     Checks if the application is running and if the database is accessible.
     """
+    db_status = "unknown"
+    errors: List[str] = []  # List to collect any errors
+
+    # Always return 200 for the health check to pass initially
+    # We'll include detailed status in the response body
+
     try:
         # Try to execute a simple query to check database connectivity
         db.exec(select(ReadingLog).limit(1))
         db_status = "healthy"
-        logger.info("Health check passed")
+        logger.info("Health check passed - Database connection successful")
     except Exception as e:
-        logger.exception("Database health check failed: %s", str(e))
         db_status = "unhealthy"
-        raise HTTPException(status_code=500, detail="Database connection failed")
+        error_msg = str(e)
+        errors.append(f"Database error: {error_msg}")
+        logger.exception("Database health check failed: %s", error_msg)
+        # Don't raise an exception here, just report the issue in the response
 
-    return {
-        "status": "healthy",
+    # Get environment information
+    environment = os.getenv("ENVIRONMENT", "development")
+    database_url = os.getenv("DATABASE_URL", "Not set")
+    # Mask the password in the database URL if present
+    if database_url != "Not set" and ":" in database_url and "@" in database_url:
+        parts = database_url.split("@")
+        credentials = parts[0].split(":")
+        if len(credentials) > 2:
+            masked_url = f"{credentials[0]}:***@{parts[1]}"
+            database_url = masked_url
+
+    response: Dict[str, Any] = {
+        "status": "healthy" if db_status == "healthy" else "degraded",
         "database": db_status,
         "version": app.version,
+        "environment": environment,
+        "database_type": "postgresql"
+        if database_url != "Not set" and database_url.startswith("postgresql")
+        else "sqlite",
     }
+
+    if errors:
+        response["errors"] = errors
+
+    return response

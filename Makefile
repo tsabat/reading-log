@@ -1,4 +1,4 @@
-.PHONY: install run dev clean test lint format docker-build docker-run help db-init db-migrate export-requirements setup check-port debug-port test-api
+.PHONY: install run dev clean test lint format docker-build docker-run help db-init db-migrate export-requirements setup check-port debug-port test-api check-db
 
 # Default target
 .DEFAULT_GOAL := help
@@ -72,3 +72,6 @@ debug-port: ## Run a simple HTTP server to debug port forwarding
 
 test-api: ## Test the API endpoints
 	$(POETRY) run $(PYTHON) scripts/test_api.py --url $(API_URL)
+
+check-db: ## Check database connection
+	$(POETRY) run $(PYTHON) scripts/check_db.py

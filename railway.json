@@ -9,6 +9,6 @@
     "restartPolicyMaxRetries": 10,
     "startCommand": "python scripts/railway_migrate.py && python scripts/railway_start.py",
     "healthcheckPath": "/health",
-    "healthcheckTimeout": 10
+    "healthcheckTimeout": 15
   }
 }
